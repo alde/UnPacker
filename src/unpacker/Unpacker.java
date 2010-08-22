@@ -37,6 +37,7 @@ class Unpacker {
 
                 while ((line = br.readLine()) != null) {
                         finisheddownloads.add(line);
+    //                    System.out.println(line);
                 }
                 unpack(finisheddownloads);
         }
@@ -46,11 +47,12 @@ class Unpacker {
                         String rartype = checkRarType(current);
                         String cmd = "unrar -y -r x " + sourcedir + current + "/" + rartype + " " + targetdir;
                         BufferedReader br = startCommand(cmd);
-
+  //                      System.out.println("++++ " + cmd);
                         String line;
                         int success = 0;
                         System.out.print("\033[37m" + current + ": ");
                         while ((line = br.readLine()) != null) {
+//                                System.out.println(line);
                                 if (line.contains("Extracting from ")) {
                                         System.out.print("\033[33m#");
                                 } else if (line.contains("All OK")) {
@@ -63,34 +65,36 @@ class Unpacker {
 
                         System.out.println("\033[37m");
                         if (success != 0) {
-//                                deleteCurrent(current);
+                                deleteCurrent(current);
                         }
                 }
 
         }
 
         private BufferedReader startCommand(String cmd) throws IOException {
-                Process process = new ProcessBuilder("bash", "-c", cmd).start();
+                ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+                Process process = pb.start();
                 InputStream is = process.getInputStream();
                 InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader br = new BufferedReader(isr);
+                pb.redirectErrorStream(true);
                 return br;
         }
 
         private String checkRarType(String current) throws IOException {
                 String cmd = "ls " + sourcedir + current + "/*.rar";
                 BufferedReader br = startCommand(cmd);
-
+//                System.out.println("----"+cmd);
                 String line;
                 while ((line = br.readLine()) != null) {
-                        //      System.out.println(line);
+  //                            System.out.println(line);
                         if (line.contains(".part01.rar")) {
                                 return "*.part01.rar";
                         } else {
                                 return "*.rar";
                         }
                 }
-                return "";
+                return "*.rar";
         }
 
         private void deleteCurrent(String current) throws IOException {
