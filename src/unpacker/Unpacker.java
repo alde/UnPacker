@@ -36,8 +36,7 @@ class Unpacker {
                 String line;
 
                 while ((line = br.readLine()) != null) {
-                        finisheddownloads.add(line);
-    //                    System.out.println(line);
+                        finisheddownloads.add(line);;
                 }
                 unpack(finisheddownloads);
         }
@@ -47,19 +46,17 @@ class Unpacker {
                         String rartype = checkRarType(current);
                         String cmd = "unrar -y -r x " + sourcedir + current + "/" + rartype + " " + targetdir;
                         BufferedReader br = startCommand(cmd);
-  //                      System.out.println("++++ " + cmd);
                         String line;
                         int success = 0;
                         System.out.print("\033[37m" + current + ": ");
                         while ((line = br.readLine()) != null) {
-//                                System.out.println(line);
                                 if (line.contains("Extracting from ")) {
-                                        System.out.print("\033[33m#");
+                                        System.out.print("\033[33m#\033[37m");
                                 } else if (line.contains("All OK")) {
                                         System.out.print(" \033[32mDone.\033[37m");
                                         success = 1;
                                 } else if (line.contains("ERROR")) {
-                                        System.out.println("\n\033[31mERROR: " + line + "\033[37m");
+                                        System.out.println("\n\033[31m" + line + "\033[37m");
                                 }
                         }
 
@@ -72,22 +69,19 @@ class Unpacker {
         }
 
         private BufferedReader startCommand(String cmd) throws IOException {
-                ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+                ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd).redirectErrorStream(true);
                 Process process = pb.start();
                 InputStream is = process.getInputStream();
                 InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader br = new BufferedReader(isr);
-                pb.redirectErrorStream(true);
                 return br;
         }
 
         private String checkRarType(String current) throws IOException {
                 String cmd = "ls " + sourcedir + current + "/*.rar";
                 BufferedReader br = startCommand(cmd);
-//                System.out.println("----"+cmd);
                 String line;
                 while ((line = br.readLine()) != null) {
-  //                            System.out.println(line);
                         if (line.contains(".part01.rar")) {
                                 return "*.part01.rar";
                         } else {
