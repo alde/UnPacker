@@ -31,10 +31,7 @@ class Unpacker {
                 targetdir = lc.getTargetDir();
                 List<String> finisheddownloads = new ArrayList<String>();
                 String cmd = "ls " + sourcedir + " | grep .finished";
-                Process process = new ProcessBuilder("bash", "-c", cmd).start();
-                InputStream is = process.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
+                BufferedReader br = startCommand(cmd);
 
                 String line;
 
@@ -48,10 +45,7 @@ class Unpacker {
                 for (String current : finisheddownloads) {
                         String rartype = checkRarType(current);
                         String cmd = "unrar -y -r x " + sourcedir + current + "/" + rartype + " " + targetdir;
-                        Process process = new ProcessBuilder("bash", "-c", cmd).start();
-                        InputStream is = process.getInputStream();
-                        InputStreamReader isr = new InputStreamReader(is);
-                        BufferedReader br = new BufferedReader(isr);
+                        BufferedReader br = startCommand(cmd);
 
                         String line;
                         int success = 0;
@@ -63,11 +57,11 @@ class Unpacker {
                                         System.out.print(" \033[32mDone.\033[37m");
                                         success = 1;
                                 } else if (line.contains("ERROR")) {
-                                        System.out.println("\n\033[31mERROR: " + line+"\033[37m");
+                                        System.out.println("\n\033[31mERROR: " + line + "\033[37m");
                                 }
                         }
 
-                                System.out.println("\033[37m");
+                        System.out.println("\033[37m");
                         if (success != 0) {
 //                                deleteCurrent(current);
                         }
@@ -75,12 +69,17 @@ class Unpacker {
 
         }
 
-        private String checkRarType(String current) throws IOException {
-                String cmd = "ls " + sourcedir + current + "/*.rar";
+        private BufferedReader startCommand(String cmd) throws IOException {
                 Process process = new ProcessBuilder("bash", "-c", cmd).start();
                 InputStream is = process.getInputStream();
                 InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader br = new BufferedReader(isr);
+                return br;
+        }
+
+        private String checkRarType(String current) throws IOException {
+                String cmd = "ls " + sourcedir + current + "/*.rar";
+                BufferedReader br = startCommand(cmd);
 
                 String line;
                 while ((line = br.readLine()) != null) {
